@@ -300,12 +300,15 @@
     .hro-title{max-width:100%}
   }
 
-  /* load-in */
+  /* load-in — unconditional; kicked off when the preloader lifts (body.loaded) */
   .hro-title,.hro-head{will-change:transform,opacity}
-  @media(prefers-reduced-motion:no-preference){
-    .hro-title{opacity:0;transform:translateY(24px)}
-    .hro-head{opacity:0;transform:translateY(-16px)}
-  }
+  @keyframes heroRise{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+  @keyframes heroImg{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+  .hro-title .hro-l1,.hro-title .hro-l2{display:inline-block;opacity:0}
+  .hro-head{opacity:0}
+  body.loaded .hro-head{animation:heroImg 1.15s cubic-bezier(.2,.7,.2,1) .3s forwards}
+  body.loaded .hro-title .hro-l1{animation:heroRise .95s cubic-bezier(.2,.7,.2,1) .5s forwards}
+  body.loaded .hro-title .hro-l2{animation:heroRise .95s cubic-bezier(.2,.7,.2,1) .68s forwards}
 </style>
 
 
@@ -594,15 +597,7 @@
   (function(){
     if(!window.gsap) return;
     var mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", function(){
-      var tl = gsap.timeline({defaults:{ease:"power3.out"}});
-      tl.to(".hro-head",{opacity:1,y:0,duration:1.1},0)
-        .to(".hro-title",{opacity:1,y:0,duration:1.0},0.15);
-      return function(){ gsap.set([".hro-title",".hro-head"],{clearProps:"all"}); };
-    });
-    mm.add("(prefers-reduced-motion: reduce)", function(){
-      gsap.set([".hro-title",".hro-head"],{opacity:1,y:0,clearProps:"transform"});
-    });
+    // hero load-in now handled by CSS (body.loaded), set by the preloader
   })();
 </script>
 
@@ -655,7 +650,7 @@
   (function(){
     var pl=document.getElementById('preloader'); if(!pl) return;
     var gone=false;
-    function hide(){ if(gone) return; gone=true; pl.classList.add('done'); setTimeout(function(){ if(pl&&pl.parentNode) pl.parentNode.removeChild(pl); },700); }
+    function hide(){ if(gone) return; gone=true; document.body.classList.add('loaded'); pl.classList.add('done'); setTimeout(function(){ if(pl&&pl.parentNode) pl.parentNode.removeChild(pl); },700); }
     window.addEventListener('load',function(){ setTimeout(hide,1200); });   // let the bar finish
     setTimeout(hide,2800);                                                   // fallback if load is slow
   })();
